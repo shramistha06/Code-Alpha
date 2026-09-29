@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Music Player</title>
+
+<style>
+    :root {
+        --bg-core: #020617;
+        --bg-panel: #111827;
+        --accent-a: #22d3ee;
+        --accent-b: #a78bfa;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        height: 100vh;
+        background: radial-gradient(circle at top, #1e293b, #020617);
+        font-family: "Segoe UI", sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .sonic-shell {
+        width: 330px;
+        background: linear-gradient(160deg, var(--bg-panel), #020617);
+        border-radius: 22px;
+        padding: 22px;
+        box-shadow: 0 25px 60px rgba(34,211,238,0.25);
+    }
+
+    .cover-orbit {
+        width: 100%;
+        height: 220px;
+        border-radius: 18px;
+        background: linear-gradient(45deg, var(--accent-a), var(--accent-b));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 18px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .pulse-ring {
+        position: absolute;
+        width: 240px;
+        height: 240px;
+        border-radius: 50%;
+        border: 3px solid rgba(255,255,255,0.15);
+        animation: pulse 3s infinite linear;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(0.9); opacity: 0.6; }
+        50% { transform: scale(1.05); opacity: 0.3; }
+        100% { transform: scale(0.9); opacity: 0.6; }
+    }
+
+    .track-meta {
+        text-align: center;
+        margin-bottom: 12px;
+    }
+
+    .track-meta h2 {
+        font-size: 18px;
+        margin: 0;
+    }
+
+    .track-meta p {
+        font-size: 13px;
+        opacity: 0.7;
+        margin: 4px 0 0;
+    }
+
+    .time-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+        margin-top: 10px;
+    }
+
+    .bar-shell {
+        flex: 1;
+        height: 6px;
+        background: #1e293b;
+        border-radius: 6px;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .bar-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(to right, var(--accent-a), var(--accent-b));
+        border-radius: 6px;
+    }
+
+    .controls {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 18px;
+    }
+
+    .btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #1e293b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.25s;
+        user-select: none;
+    }
+
+    .btn:hover {
+        background: var(--accent-a);
+        color: #020617;
+        transform: scale(1.1);
+    }
+
+    .btn.main {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(45deg, var(--accent-a), var(--accent-b));
+        color: #020617;
+        font-size: 20px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="sonic-shell">
+    <div class="cover-orbit">
+        <div class="pulse-ring"></div>
+        <span><h1>🎵</h1></span>
+    </div>
+
+    <div class="track-meta">
+        <h1 id="trackTitle">Desi Kalakaar</h1>
+        <p id="trackArtist">YO YO HONNEY SINGH</p>
+    </div>
+
+    <div class="time-bar">
+        <span id="currentTime">0:00</span>
+        <div class="bar-shell" onclick="seekTrack(event)">
+            <div class="bar-fill" id="progressFill"></div>
+        </div>
+        <span id="totalTime">0:00</span>
+    </div>
+
+    <div class="controls">
+        <div class="btn" onclick="previousTrack()">⏮</div>
+        <div class="btn main" onclick="togglePlay()">▶</div>
+        <div class="btn" onclick="nextTrack()">⏭</div>
+    </div>
+</div>
+
+<script>
+    const tracks = [
+        {
+            title: "Stellar Drift",
+            artist: "Aurora Synth",
+            file: "music1.mp3"
+        },
+        {
+            title: "Neon Skies",
+            artist: "Cosmic Pulse",
+            file: "music2.mp3"
+        },
+        {
+            title: "Midnight Orbit",
+            artist: "Nova Waves",
+            file: "music3.mp3"
+        }
+    ];
+
+    let index = 0;
+    let playing = false;
+
+    const audio = new Audio();
+    const title = document.getElementById("trackTitle");
+    const artist = document.getElementById("trackArtist");
+    const playBtn = document.querySelector(".btn.main");
+    const fill = document.getElementById("progressFill");
+    const now = document.getElementById("currentTime");
+    const total = document.getElementById("totalTime");
+
+    loadTrack(index);
+
+    function loadTrack(i) {
+        audio.src = tracks[i].file;
+        title.textContent = tracks[i].title;
+        artist.textContent = tracks[i].artist;
+        audio.load();
+    }
+
+    function togglePlay() {
+        if (!playing) {
+            audio.play();
+            playBtn.textContent = "⏸";
+            playing = true;
+        } else {
+            audio.pause();
+            playBtn.textContent = "▶";
+            playing = false;
+        }
+    }
+
+    function nextTrack() {
+        index = (index + 1) % tracks.length;
+        loadTrack(index);
+        if (playing) audio.play();
+    }
+
+    function previousTrack() {
+        index = (index - 1 + tracks.length) % tracks.length;
+        loadTrack(index);
+        if (playing) audio.play();
+    }
+
+    audio.addEventListener("timeupdate", () => {
+        if (audio.duration) {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            fill.style.width = percent + "%";
+            now.textContent = formatTime(audio.currentTime);
+            total.textContent = formatTime(audio.duration);
+        }
+    });
+
+    function seekTrack(e) {
+        const bar = e.currentTarget;
+        const pos = e.offsetX / bar.offsetWidth;
+        audio.currentTime = pos * audio.duration;
+    }
+
+    function formatTime(sec) {
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60).toString().padStart(2, "0");
+        return `${m}:${s}`;
+    }
+</script>
+
+</body>
+</html>
